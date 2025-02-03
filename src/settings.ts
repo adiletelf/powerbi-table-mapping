@@ -38,59 +38,6 @@ import SimpleCard = formattingSettings.SimpleCard;
 import CompositeCard = formattingSettings.CompositeCard;
 import FormattingSettingsModel = formattingSettings.Model;
 
-
-export class LegendCard extends SimpleCard {
-    show = new formattingSettings.ToggleSwitch({
-        name: "show",
-        displayName: "Show",
-        value: true,
-    });
-
-    name = "legend";
-    displayName = "Legend";
-    slices: SimpleSlice[] = [this.show];
-}
-
-export class MilestoneCard extends CompositeCard {
-    name = "milestone";
-    displayName = "Milestone";
-    groups = [];
-}
-
 export class VisualFormattingSettingsModel extends FormattingSettingsModel {
-    legend = new LegendCard();
-    milestones = new MilestoneCard();
-
-    cards = [this.legend, this.milestones];
-
-    public populateMilestones(milestones: LegendDataPoint[]) {
-        if (!milestones || milestones.length === 0) {
-            return;
-        }
-
-        const milestoneGroups = [];
-
-        milestones.forEach((milestone: LegendDataPoint) => {
-            if (!milestone || !milestone.name) {
-                return;
-            }
-
-            const colorPicker = new formattingSettings.ColorPicker({
-                name: "fill",
-                displayName: milestone.name,
-                value: { value: milestone.color },
-                selector: ColorHelper.normalizeSelector(milestone.identity.getSelector(), false),
-            });
-
-            const newGroup = new Group({
-                name: milestone.name,
-                displayName: milestone.name,
-                slices: [colorPicker],
-            })
-
-            milestoneGroups.push(newGroup);
-        });
-
-        this.milestones.groups = milestoneGroups;
-    }
+    cards = [];
 }

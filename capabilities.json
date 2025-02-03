@@ -1,136 +1,28 @@
 {
     "dataRoles": [
         {
-            "name": "Legend",
-            "displayName": "Legend",
-            "displayNameKey": "Role_Legend",
-            "kind": "Grouping"
-        },
-        {
             "name": "Task",
             "displayName": "Task",
             "displayNameKey": "Role_Task",
-            "kind": "Grouping"
-        },
-        {
-            "name": "Parent",
-            "displayName": "Parent",
-            "displayNameKey": "Role_Parent",
-            "kind": "Grouping"
-        },
-        {
-            "name": "StartDate",
-            "displayName": "Start Date",
-            "displayNameKey": "Role_StartDate",
-            "kind": "Grouping"
-        },
-        {
-            "name": "EndDate",
-            "displayName": "End Date",
-            "displayNameKey": "Role_EndDate",
-            "kind": "Measure"
-        },
-        {
-            "name": "Duration",
-            "displayName": "Duration",
-            "displayNameKey": "Role_Duration",
-            "kind": "Measure",
+            "kind": "Grouping",
             "requiredTypes": [
                 {
-                    "numeric": true
-                },
-                {
-                    "integer": true
+                    "text": true
                 }
             ]
-        },
-        {
-            "name": "Completion",
-            "displayName": "% Completion",
-            "displayNameKey": "Role_Completion",
-            "kind": "Measure",
-            "requiredTypes": [
-                {
-                    "numeric": true
-                },
-                {
-                    "integer": true
-                }
-            ]
-        },
-        {
-            "name": "Resource",
-            "displayName": "Resource",
-            "displayNameKey": "Role_Resource",
-            "kind": "Grouping"
-        },
-        {
-            "name": "ExtraInformation",
-            "displayName": "Tooltips",
-            "displayNameKey": "Role_Tooltips",
-            "kind": "Grouping"
-        },
-        {
-            "name": "Milestones",
-            "displayName": "Milestones",
-            "displayNameKey": "Milestones",
-            "kind": "Grouping"
         }
     ],
     "dataViewMappings": [
         {
-            "matrix": {
+            "table": {
                 "rows": {
                     "select": [
-                        { "for": { "in": "Legend" } },
                         { "for": { "in": "Task" } }
-                    ]
-                },
-                "columns": {
-                    "for": { "in": "Milestones" }
-                },
-                "values": {
-                    "select": [
-                        { "for": { "in": "Duration" } },
-                        { "for": { "in": "Completion" } }
                     ]
                 }
             }
         }
     ],
-    "objects": {
-        "legend": {
-            "properties": {
-                "show": {
-                    "type": {
-                        "bool": true
-                    }
-                },
-                "fill": {
-                    "type": {
-                        "fill": {
-                            "solid": {
-                                "color": true
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "milestone": {
-            "properties": {
-                "fill": {
-                    "type": {
-                        "fill": {
-                            "solid": {
-                                "color": true
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    },
     "sorting": {
         "default": {}
     },

@@ -43,8 +43,6 @@ import IColorPalette = powerbi.extensibility.IColorPalette;
 
 import { VisualFormattingSettingsModel } from "./settings";
 import { ColorHelper } from "powerbi-visuals-utils-colorutils";
-import { valueFormatter } from "powerbi-visuals-utils-formattingutils";
-import { ValueFormatterOptions } from "powerbi-visuals-utils-formattingutils/lib/src/valueFormatter";
 
 export interface LegendDataPoint {
     name: string;
@@ -69,10 +67,6 @@ export class Visual implements IVisual {
     private formattingSettingsService: FormattingSettingsService;
     private dataView: DataView;
     private colors: IColorPalette;
-    private legendDataPoints: LegendDataPoint[];
-    private milestones: LegendDataPoint[];
-
-    private milestoneMap = {};
 
     constructor(options: VisualConstructorOptions) {
         this.formattingSettingsService = new FormattingSettingsService();
@@ -88,60 +82,17 @@ export class Visual implements IVisual {
 
             this.target.replaceChildren();
 
-            const milestoneColorHelper = new ColorHelper(this.colors, MilestonePropertyIdentifier);
-            this.milestones = this.dataView.matrix.columns.root.children.map((column: DataViewMatrixNode, index: number) => {
-                const milestone = column.value.toString();
-
-                const color = milestoneColorHelper.getColorForMeasure(column.objects, milestone);
-                const identity = this.host.createSelectionIdBuilder()
-                    .withMatrixNode(column, this.dataView.matrix.rows.levels)
-                    .createSelectionId();
-
-                const legendDataPoint: LegendDataPoint = {
-                    name: milestone,
-                    color: color,
-                    identity: identity,
-                };
-
-                this.milestoneMap[milestone] = index;
-                this.milestoneMap[index] = milestone;
+            this.dataView.table.rows.forEach((row, index) => {
+                if (!row) {
+                    return;
+                }
 
                 const p = document.createElement("p");
-                p.textContent = milestone;
-                p.style.color = color;
-                this.target.appendChild(p);
-
-                return legendDataPoint;
-            });
-
-            this.dataView.matrix.rows.root.children.forEach((row: DataViewMatrixNode) => {
-                const taskName = row.value.toString();
-                // const value = row.values[0]?.value?.toString() || 'N/A';
-                const columnIndex = Object.values(row.values).findIndex(obj => obj.value != null);
-                const milestoneName = this.milestoneMap[columnIndex];
-                const color = !!milestoneName
-                    ? milestoneColorHelper.getColorForMeasure(this.dataView.matrix.columns.root[columnIndex], milestoneName)
-                    : "black";
-
-                const value = !!milestoneName
-                    ? 'N/A'
-                    : row.values[columnIndex].value.toString();
-
-                const p = document.createElement("p");
-                p.textContent = `${taskName}: ${value}`;
-                p.style.color = color;
+                p.textContent = row.toString();
                 this.target.appendChild(p);
             });
-            
-            const formatterOptions: ValueFormatterOptions = {
-                value: 1000,
-                precision: 1,
-                cultureSelector: "de-CH",
-            };
 
-            const formatter = valueFormatter.create(formatterOptions);
-            const value = formatter.format(2500);
-            console.log(value);
+            console.log(this.dataView);
 
         } catch (error) {
             console.error(error);
@@ -153,10 +104,6 @@ export class Visual implements IVisual {
      * This method is called once every time we open properties pane or when the user edit any format property. 
      */
     public getFormattingModel(): powerbi.visuals.FormattingModel {
-        if (this.milestones?.length > 0) {
-            this.formattingSettings.populateMilestones(this.milestones);
-        }
-
         return this.formattingSettingsService.buildFormattingModel(this.formattingSettings);
     }
 }
