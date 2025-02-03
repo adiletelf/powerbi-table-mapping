@@ -27,57 +27,70 @@
 "use strict";
 
 import { formattingSettings } from "powerbi-visuals-utils-formattingmodel";
+import powerbi from "powerbi-visuals-api";
+import DataViewTableRow = powerbi.DataViewTableRow;
 
-import FormattingSettingsCard = formattingSettings.SimpleCard;
-import FormattingSettingsSlice = formattingSettings.Slice;
+import { LegendDataPoint } from "./visual";
+import { ColorHelper } from "powerbi-visuals-utils-colorutils";
+import { Group, SimpleSlice } from "powerbi-visuals-utils-formattingmodel/lib/FormattingSettingsComponents";
+import ISelectionId = powerbi.visuals.ISelectionId;
+import SimpleCard = formattingSettings.SimpleCard;
+import CompositeCard = formattingSettings.CompositeCard;
 import FormattingSettingsModel = formattingSettings.Model;
 
-/**
- * Data Point Formatting Card
- */
-class DataPointCardSettings extends FormattingSettingsCard {
-    defaultColor = new formattingSettings.ColorPicker({
-        name: "defaultColor",
-        displayName: "Default color",
-        value: { value: "" }
+
+export class LegendCard extends SimpleCard {
+    show = new formattingSettings.ToggleSwitch({
+        name: "show",
+        displayName: "Show",
+        value: true,
     });
 
-    showAllDataPoints = new formattingSettings.ToggleSwitch({
-        name: "showAllDataPoints",
-        displayName: "Show all",
-        value: true
-    });
-
-    fill = new formattingSettings.ColorPicker({
-        name: "fill",
-        displayName: "Fill",
-        value: { value: "" }
-    });
-
-    fillRule = new formattingSettings.ColorPicker({
-        name: "fillRule",
-        displayName: "Color saturation",
-        value: { value: "" }
-    });
-
-    fontSize = new formattingSettings.NumUpDown({
-        name: "fontSize",
-        displayName: "Text Size",
-        value: 12
-    });
-
-    name: string = "dataPoint";
-    displayName: string = "Data colors";
-    slices: Array<FormattingSettingsSlice> = [this.defaultColor, this.showAllDataPoints, this.fill, this.fillRule, this.fontSize];
+    name = "legend";
+    displayName = "Legend";
+    slices: SimpleSlice[] = [this.show];
 }
 
-/**
-* visual settings model class
-*
-*/
-export class VisualFormattingSettingsModel extends FormattingSettingsModel {
-    // Create formatting settings model formatting cards
-    dataPointCard = new DataPointCardSettings();
+export class MilestoneCard extends CompositeCard {
+    name = "milestone";
+    displayName = "Milestone";
+    groups = [];
+}
 
-    cards = [this.dataPointCard];
+export class VisualFormattingSettingsModel extends FormattingSettingsModel {
+    legend = new LegendCard();
+    milestones = new MilestoneCard();
+
+    cards = [this.legend, this.milestones];
+
+    public populateMilestones(milestones: LegendDataPoint[]) {
+        if (!milestones || milestones.length === 0) {
+            return;
+        }
+
+        const milestoneGroups = [];
+
+        milestones.forEach((milestone: LegendDataPoint) => {
+            if (!milestone || !milestone.name) {
+                return;
+            }
+
+            const colorPicker = new formattingSettings.ColorPicker({
+                name: "fill",
+                displayName: milestone.name,
+                value: { value: milestone.color },
+                selector: ColorHelper.normalizeSelector(milestone.identity.getSelector(), false),
+            });
+
+            const newGroup = new Group({
+                name: milestone.name,
+                displayName: milestone.name,
+                slices: [colorPicker],
+            })
+
+            milestoneGroups.push(newGroup);
+        });
+
+        this.milestones.groups = milestoneGroups;
+    }
 }
